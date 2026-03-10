@@ -1,0 +1,13 @@
+yfinance
+pandas
+numpy
+statsmodels
+arch
+scikit-learn
+torch
+fredapi
+vaderSentiment
+flask
+requests
+matplotlib
+gunicorn

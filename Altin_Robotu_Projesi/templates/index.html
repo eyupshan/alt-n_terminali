@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altın Quant Terminali | AI Powered</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="bg-blobs">
+        <div class="b1"></div>
+        <div class="b2"></div>
+        <div class="b3"></div>
+    </div>
+
+    <div class="shell">
+
+        <!-- NAV -->
+        <nav class="navbar">
+            <div class="logo">ALTIN<span>QUANT</span></div>
+            <div class="navtabs" id="navtabs">
+                <button class="ntab active" onclick="goTab('ana',this)">📊 Ana</button>
+                <button class="ntab" onclick="goTab('teknik',this)">📈 Teknik</button>
+                <button class="ntab" onclick="goTab('ml',this)">🧠 YZ&ML</button>
+                <button class="ntab" onclick="goTab('risk',this)">⚠️ Risk</button>
+                <button class="ntab" onclick="goTab('portfoy',this)">💼 Portföy</button>
+                <button class="ntab" onclick="goTab('strateji',this)">🎯 Strateji</button>
+                <button class="ntab" onclick="goTab('ekonometri',this)">📐 Ekonometri</button>
+                <button class="ntab" onclick="goTab('makro',this)">🌍 Makro</button>
+                <button class="ntab" onclick="goTab('backtest',this)">🔁 Backtest</button>
+                <button class="ntab" onclick="goTab('mikro',this)">🔬 Mikro</button>
+                <button class="ntab" onclick="goTab('perf',this)">🏆 Performans</button>
+                <button class="ntab" onclick="goTab('robot',this)">🤖 Karar Robotu</button>
+                <button class="ntab" onclick="goTab('haber',this)">📰 Haberler</button>
+            </div>
+            <div class="live-pill"><span class="pulse"></span>CANLI</div>
+        </nav>
+
+        <!-- ═══ SAYFA 1: ANA PANEL ═══ -->
+        <div id="tab-ana" class="tab active">
+            <div class="price-hero">
+                <div class="glass price-card gold">
+                    <label>ONS ALTIN</label>
+                    <div class="price-big" id="ons-price">$---</div>
+                    <div class="price-chg" id="ons-chg">---</div>
+                    <small>XAU/USD Troy Ons</small>
+                </div>
+                <div class="glass price-card blue">
+                    <label>GRAM ALTIN</label>
+                    <div class="price-big" id="gram-price">₺---</div>
+                    <div class="price-chg" id="gram-chg">---</div>
+                    <small>TRY / Gram</small>
+                </div>
+                <div class="glass price-card signal-card">
+                    <label>BİRLEŞİK SİNYAL</label>
+                    <div class="price-big signal-hold" id="main-signal">BEKLE</div>
+                    <small>Z-Skor + RSI + MACD</small>
+                </div>
+            </div>
+            <div class="six-grid">
+                <div class="glass mc" data-id="RSI" data-min="30" data-max="70" data-unit="">RSI<b
+                        id="m-RSI">50</b><span>İdeal: 30-70</span></div>
+                <div class="glass mc" data-id="Z_Score" data-min="-2" data-max="2" data-unit="σ">Z-Skor<b
+                        id="m-Z_Score">0</b><span>İdeal: -2 / +2</span></div>
+                <div class="glass mc" data-id="Hurst" data-min="0.4" data-max="0.6" data-unit="">Hurst<b
+                        id="m-Hurst">0.50</b><span>0.5=Random</span></div>
+                <div class="glass mc" data-id="Volatility" data-min="0.05" data-max="0.25" data-unit="%">Volatilite<b
+                        id="m-Volatility">0%</b><span>İdeal: 5-25%</span></div>
+                <div class="glass mc" data-id="Momentum_20" data-min="-0.05" data-max="0.05" data-unit="%">Mom (20g)<b
+                        id="m-Momentum_20">0%</b><span>İdeal: ±5%</span></div>
+                <div class="glass mc" data-id="Price_Pos_52wk" data-min="0.2" data-max="0.8" data-unit="%">52H
+                    Pozisyon<b id="m-Price_Pos_52wk">50%</b><span>İdeal: %20-80</span></div>
+            </div>
+            <div class="glass chart-wrap">
+                <div class="chart-hdr">
+                    <h2>Fiyat Grafiği (Gram Altın TRY)</h2>
+                    <div class="chart-btns">
+                        <button class="cb active" onclick="setChartType('gram',this)">GRAM TRY</button>
+                        <button class="cb" onclick="setChartType('ons',this)">ONS USD</button>
+                    </div>
+                </div>
+                <div id="main-chart" style="height:400px;width:100%;"></div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 2: TEKNİK ANALİZ ═══ -->
+        <div id="tab-teknik" class="tab">
+            <div class="page-hdr">📈 Teknik Analiz</div>
+            <div class="four-grid">
+                <div class="glass panel">
+                    <h3>RSI — Göreceli Güç Endeksi</h3>
+                    <div class="big-num" id="t-rsi">50.0</div>
+                    <div class="range-bar">
+                        <div class="rb-fill" id="rsi-bar"></div>
+                        <div class="rb-pointer" id="rsi-pointer"></div>
+                    </div>
+                    <div class="range-labels"><span class="green">Aşırı Satım (&lt;30)</span><span>Nötr</span><span
+                            class="red">Aşırı Alım (&gt;70)</span></div>
+                    <div class="status-row" id="rsi-status"></div>
+                </div>
+                <div class="glass panel">
+                    <h3>MACD</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>MACD</label><b id="t-macd">0.00</b></div>
+                        <div class="kv"><label>Sinyal</label><b id="t-macd-sig">0.00</b></div>
+                        <div class="kv"><label>Histogram</label><b id="t-macd-hist" class="green">0.00</b></div>
+                        <div class="kv"><label>Durum</label><b id="t-macd-status">Nötr</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Bollinger Bantları</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Üst Bant</label><b id="t-bb-up">0.00</b></div>
+                        <div class="kv"><label>Orta (MA20)</label><b id="t-bb-mid">0.00</b></div>
+                        <div class="kv"><label>Alt Bant</label><b id="t-bb-lo">0.00</b></div>
+                        <div class="kv"><label>%B</label><b id="t-bb-pct">0.50</b></div>
+                    </div>
+                    <div class="bb-vis">
+                        <div class="bbv-up"></div>
+                        <div class="bbv-price" id="bbv-price-pos"></div>
+                        <div class="bbv-lo"></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Osilatörler</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Williams %R</label><b id="t-wr">-50</b><small>İdeal: -20 ile -80</small>
+                        </div>
+                        <div class="kv"><label>CCI</label><b id="t-cci">0</b><small>İdeal: ±100</small></div>
+                        <div class="kv"><label>Stochastic K</label><b id="t-stoch-k">50</b></div>
+                        <div class="kv"><label>Stochastic D</label><b id="t-stoch-d">50</b></div>
+                        <div class="kv"><label>ATR</label><b id="t-atr">0.00</b></div>
+                    </div>
+                </div>
+            </div>
+            <div class="two-grid mt2">
+                <div class="glass panel">
+                    <h3>Moving Averages</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>SMA 20</label><b id="t-sma20">0</b></div>
+                        <div class="kv"><label>SMA 50</label><b id="t-sma50">0</b></div>
+                        <div class="kv"><label>SMA 200</label><b id="t-sma200">0</b></div>
+                        <div class="kv"><label>Durum (MA Cross)</label><b id="t-macross">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Fibonacci Seviyeleri</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>%23.6</label><b id="t-fib236">0</b></div>
+                        <div class="kv"><label>%38.2</label><b id="t-fib382">0</b></div>
+                        <div class="kv"><label>%50.0</label><b id="t-fib500">0</b></div>
+                        <div class="kv"><label>%61.8</label><b id="t-fib618">0</b></div>
+                        <div class="kv"><label>%78.6</label><b id="t-fib786">0</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 3: YZ & ML ═══ -->
+        <div id="tab-ml" class="tab">
+            <div class="page-hdr">🧠 Yapay Zeka & Makine Öğrenimi</div>
+            <div class="three-grid">
+                <div class="glass panel ai-panel">
+                    <h3>🤖 RL Agent (Deep Q-Network)</h3>
+                    <div class="big-num gold" id="ml-rl-status">---</div>
+                    <div class="kv-list">
+                        <div class="kv"><label>Epsilon (Keşif)</label><b id="ml-epsilon">1.000</b><small>İdeal:
+                                &lt;0.1</small></div>
+                        <div class="kv"><label>Algoritma</label><b>DQN + PPO Hybrid</b></div>
+                        <div class="kv"><label>Aksiyon Uzayı</label><b>Al / Sat / Bekle</b></div>
+                        <div class="kv"><label>State Boyutu</label><b>10 özellik</b></div>
+                        <div class="kv"><label>Durum</label><b id="ml-rl-state">Özerkleşiyor...</b></div>
+                    </div>
+                    <div class="ai-progress">
+                        <div class="ap-fill" id="rl-progress"></div>
+                    </div>
+                </div>
+                <div class="glass panel ai-panel">
+                    <h3>🔮 LSTM / GRU / Transformer</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>LSTM</label><b id="ml-lstm">Simüle</b></div>
+                        <div class="kv"><label>GRU</label><b>Simüle (PyTorch)</b></div>
+                        <div class="kv"><label>Transformer</label><b id="ml-transformer">Simüle</b></div>
+                        <div class="kv"><label>TCN</label><b>Temporal Conv Net</b></div>
+                        <div class="kv"><label>Aktivasyon</label><b>ReLU / GELU</b></div>
+                        <div class="kv"><label>Optimizer</label><b>Adam / AdamW</b></div>
+                        <div class="kv"><label>Loss</label><b>MSE + Huber</b></div>
+                    </div>
+                </div>
+                <div class="glass panel ai-panel">
+                    <h3>📊 Öğrenme Durumu</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Öğrenme Türü</label><b>Reinforcement + Supervised</b></div>
+                        <div class="kv"><label>Transfer Learning</label><b>✅ Aktif</b></div>
+                        <div class="kv"><label>Online Learning</label><b>✅ Aktif</b></div>
+                        <div class="kv"><label>Meta Learning</label><b>🟡 Planlandı</b></div>
+                        <div class="kv"><label>Self-Supervised</label><b>✅ Aktif</b></div>
+                        <div class="kv"><label>Düzenlileştirme</label><b>L2 + Dropout</b></div>
+                    </div>
+                </div>
+            </div>
+            <div class="two-grid mt2">
+                <div class="glass panel">
+                    <h3>🧬 Evrimsel Algoritmalar</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Genetic Algorithm</label><b>Parametre Optimizasyonu</b></div>
+                        <div class="kv"><label>Particle Swarm</label><b>Portfolio Ağırlıkları</b></div>
+                        <div class="kv"><label>Simulated Annealing</label><b>Strateji Optimizasyonu</b></div>
+                        <div class="kv"><label>Bayesian Opt.</label><b>Hyperparameter Tuning</b></div>
+                        <div class="kv"><label>Gradient Descent</label><b>✅ Aktif (Adam)</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>🔍 Desen Tanıma</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Hurst Katsayısı</label><b id="ml-hurst">0.50</b><small>İdeal: &gt;0.6
+                                Trend</small></div>
+                        <div class="kv"><label>Z-Skor</label><b id="ml-zscore">0.00</b><small>İdeal: ±2</small></div>
+                        <div class="kv"><label>Volatilite Kümesi</label><b id="ml-volregime">NORMAL</b></div>
+                        <div class="kv"><label>Rejim</label><b id="ml-regime">YATAY</b></div>
+                    </div>
+                    <div class="memory-box" id="ml-patterns">Analiz ediliyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 4: RİSK YÖNETİMİ ═══ -->
+        <div id="tab-risk" class="tab">
+            <div class="page-hdr">⚠️ Risk Yönetimi</div>
+            <div class="four-grid">
+                <div class="glass panel risk-gls">
+                    <h3>Riske Maruz Değer (VaR)</h3>
+                    <div class="big-num red" id="r-var95">---</div>
+                    <small>95% güven - günlük</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>VaR %99</label><b id="r-var99">---</b></div>
+                        <div class="kv"><label>CVaR %95</label><b id="r-cvar95">---</b></div>
+                    </div>
+                    <div class="ideal-bar">
+                        <div class="ib-fill red-fill" id="var-bar"></div>
+                    </div>
+                    <small class="dim">İdeal: &lt; %2.0 günlük</small>
+                </div>
+                <div class="glass panel risk-gls">
+                    <h3>Maksimum Düşüş</h3>
+                    <div class="big-num red" id="r-maxdd">---</div>
+                    <small>Tarihsel en kötü senaryo</small>
+                    <div class="dd-bar-container">
+                        <div class="ddb-fill" id="r-dd-fill"></div>
+                    </div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>Calmar Oranı</label><b id="r-calmar">---</b></div>
+                        <div class="kv"><label>İdeal Max DD</label><b class="green">&lt; %10</b></div>
+                    </div>
+                </div>
+                <div class="glass panel risk-gls">
+                    <h3>Monte Carlo Simülasyonu</h3>
+                    <div class="big-num gold" id="r-mc30">---</div>
+                    <small>30 Günlük Senaryo (1000 yol)</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>MC 90 Gün</label><b id="r-mc90">---</b></div>
+                        <div class="kv"><label>Mevcut Fiyat</label><b id="r-curr-price">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel risk-gls">
+                    <h3>Volatilite Analizi</h3>
+                    <div class="big-num" id="r-vol">---</div>
+                    <small>Yıllık Realize Vol</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>GARCH Vol</label><b id="r-garch">---</b></div>
+                        <div class="kv"><label>Volatilite Rejimi</label><b id="r-volreg">---</b></div>
+                        <div class="kv"><label>İdeal Aralık</label><b class="green">%10-25</b></div>
+                    </div>
+                </div>
+            </div>
+            <div class="two-grid mt2">
+                <div class="glass panel">
+                    <h3>Tail Risk & Stress Test</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Expected Shortfall (CVaR)</label><b id="r-es">---</b></div>
+                        <div class="kv"><label>Downside Deviation</label><b id="r-dd-dev">---</b></div>
+                        <div class="kv"><label>VOL %95 Aşım</label><b id="r-vol-exceed">---</b></div>
+                        <div class="kv"><label>Kurtosis (Kuyruk Riski)</label><b id="r-kurt">---</b></div>
+                        <div class="kv"><label>Skewness</label><b id="r-skew">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Risk Senaryo Analizi</h3>
+                    <div class="scenario-list">
+                        <div class="scenario"><span>🔴 Kriz (-30%)</span><b id="sc-crash">---</b></div>
+                        <div class="scenario"><span>🟠 Ayı (-15%)</span><b id="sc-bear">---</b></div>
+                        <div class="scenario"><span>🟡 Yatay (±0%)</span><b id="sc-flat">---</b></div>
+                        <div class="scenario"><span>🟢 Boğa (+15%)</span><b id="sc-bull">---</b></div>
+                        <div class="scenario"><span>💎 Ralli (+30%)</span><b id="sc-rally">---</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 5: PORTFÖY OPTİMİZASYON ═══ -->
+        <div id="tab-portfoy" class="tab">
+            <div class="page-hdr">💼 Portföy Optimizasyonu</div>
+            <div class="three-grid">
+                <div class="glass panel">
+                    <h3>Kelly Criterion</h3>
+                    <div class="big-num gold" id="p-kelly">---</div>
+                    <small>Optimal Pozisyon Büyüklüğü</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>Win Rate</label><b id="p-winrate">---</b></div>
+                        <div class="kv"><label>Profit Factor</label><b id="p-pf">---</b></div>
+                        <div class="kv"><label>Tam Kelly</label><b id="p-kelly-full">---</b></div>
+                        <div class="kv"><label>Yarım Kelly (Güvenli)</label><b id="p-kelly-half">---</b></div>
+                        <div class="kv"><label>İdeal Aralık</label><b class="green">%10-30</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Risk Parity</h3>
+                    <div class="big-num blue" id="p-rp-weight">---</div>
+                    <small>Volatiliteye Göre Ağırlık</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>Yıllık Volatilite</label><b id="p-vol">---</b></div>
+                        <div class="kv"><label>Inverse Vol Ağırlık</label><b id="p-inv-vol">---</b></div>
+                        <div class="kv"><label>Max Kaldıraç</label><b>2x</b></div>
+                        <div class="kv"><label>Optimal Boyut</label><b id="p-opt-size">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Portföy Metrikleri</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Efficient Frontier Sharpe</label><b id="p-ef-sharpe">---</b></div>
+                        <div class="kv"><label>Black-Litterman</label><b>%60 Altın + %40 Nakit</b></div>
+                        <div class="kv"><label>Hierarchical RP</label><b>Uygulandı</b></div>
+                        <div class="kv"><label>Dinamik Tahsis</label><b id="p-dynamic">---</b></div>
+                        <div class="kv"><label>Mean-Variance Opt.</label><b>✅ Aktif</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 6: STRATEJİ MOTORU ═══ -->
+        <div id="tab-strateji" class="tab">
+            <div class="page-hdr">🎯 Strateji Motoru</div>
+            <div class="four-grid">
+                <div class="glass panel">
+                    <h3>Momentum Stratejisi</h3>
+                    <div class="signal-big" id="s-mom">BEKLE</div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>5 Günlük Mom.</label><b id="s-mom5">---</b></div>
+                        <div class="kv"><label>20 Günlük Mom.</label><b id="s-mom20">---</b></div>
+                        <div class="kv"><label>60 Günlük Mom.</label><b id="s-mom60">---</b></div>
+                        <div class="kv"><label>Eşik</label><b class="dim">±2%</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Ortalamaya Dönüş</h3>
+                    <div class="signal-big" id="s-mr">BEKLE</div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>Z-Skor</label><b id="s-zscore">---</b></div>
+                        <div class="kv"><label>Eşik</label><b>±2σ</b></div>
+                        <div class="kv"><label>Yarı Ömür (Gün)</label><b id="s-halflife">---</b></div>
+                        <div class="kv"><label>BB Pozisyon %B</label><b id="s-bbpct">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Trend Takip</h3>
+                    <div class="signal-big" id="s-trend">BEKLE</div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>MA Cross</label><b id="s-macross">---</b></div>
+                        <div class="kv"><label>SMA20 > SMA50</label><b id="s-golden">---</b></div>
+                        <div class="kv"><label>Hurst (Trend)</label><b id="s-hurst">---</b></div>
+                        <div class="kv"><label>MACD Hist.</label><b id="s-macd-hist">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Birleşik Sinyal (AI)</h3>
+                    <div class="signal-big" id="s-combined">BEKLE</div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>RSI + MACD</label><b id="s-rsi-macd">---</b></div>
+                        <div class="kv"><label>Rejim</label><b id="s-regime">---</b></div>
+                        <div class="kv"><label>Volatilite Bazlı</label><b id="s-vol-signal">---</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 7: EKONOMETRİ ═══ -->
+        <div id="tab-ekonometri" class="tab">
+            <div class="page-hdr">📐 Ekonometri & İstatistik</div>
+            <div class="three-grid">
+                <div class="glass panel">
+                    <h3>Zaman Serisi Analizi</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Hurst Katsayısı</label><b id="e-hurst">0.50</b><small>0.5=RW,
+                                &gt;0.6=Trend</small></div>
+                        <div class="kv"><label>Yarı Ömür (Gün)</label><b id="e-halflife">---</b></div>
+                        <div class="kv"><label>Otokorelasyon (Lag 1)</label><b id="e-autocorr">---</b></div>
+                        <div class="kv"><label>ARIMA (Tahmin)</label><b>ARIMA(1,1,1)</b></div>
+                        <div class="kv"><label>ADF Testi</label><b id="e-adf">Durağanlık Test</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Volatilite Modelleri</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Realize Vol (21g)</label><b id="e-rvol">---</b></div>
+                        <div class="kv"><label>GARCH Vol (EWMA)</label><b id="e-garch">---</b></div>
+                        <div class="kv"><label>GARCH Tahmin</label><b>GARCH(1,1)</b></div>
+                        <div class="kv"><label>EGARCH</label><b>Asimetrik Etki</b></div>
+                        <div class="kv"><label>Vol Kümelemesi</label><b id="e-volcluster">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>İstatistiksel Özellikler</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Skewness</label><b id="e-skew">---</b><small>İdeal: ~0</small></div>
+                        <div class="kv"><label>Kurtosis</label><b id="e-kurt">---</b><small>Normal: 3</small></div>
+                        <div class="kv"><label>Downside Dev.</label><b id="e-ds-dev">---</b></div>
+                        <div class="kv"><label>Durağanlık</label><b id="e-stationary">---</b></div>
+                        <div class="kv"><label>Kalman Filtre</label><b>EMA Proxy (span=10)</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 8: MAKRO EKONOMİ ═══ -->
+        <div id="tab-makro" class="tab">
+            <div class="page-hdr">🌍 Makro Ekonomi Göstergeleri</div>
+            <div class="four-grid">
+                <div class="glass panel">
+                    <h3>🏦 FED Politikası</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Faiz Oranı</label><b id="mac-rate" class="gold">5.25%</b><small>İdeal
+                                Altın: Düşük faiz</small></div>
+                        <div class="kv"><label>M2 Para Arzı</label><b>21.2T $</b></div>
+                        <div class="kv"><label>Getiri Eğrisi</label><b>Düz (2yr-10yr)</b></div>
+                        <div class="kv"><label>QT/QE</label><b>QT (Sıkılaşma)</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>📊 Enflasyon</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>CPI (YoY)</label><b><span id="mac-cpi">310.5</span></b></div>
+                        <div class="kv"><label>PPI</label><b>%2.1</b></div>
+                        <div class="kv"><label>PCE</label><b>%2.5</b></div>
+                        <div class="kv"><label>Enflasyon Riski</label><b class="gold">Yüksek (Altın için Θ)</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>📉 Ekonomik Aktivite</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>GDP Büyüme</label><b>%2.8</b></div>
+                        <div class="kv"><label>İşsizlik</label><b>%4.1</b></div>
+                        <div class="kv"><label>PMI İmalat</label><b>48.5 (Daralma)</b></div>
+                        <div class="kv"><label>Tüketici Güveni</label><b>%92.3</b></div>
+                        <div class="kv"><label>ISM</label><b>49.2</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>🌐 Jeopolitik & Duygu</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Haber Duyarlılığı</label><b id="mac-sent">---</b></div>
+                        <div class="kv"><label>Altın Talebi</label><b>Merkez Bankası Alımları</b></div>
+                        <div class="kv"><label>USD Gücü (DXY)</label><b>Ters Korelasyon</b></div>
+                        <div class="kv"><label>VIX (Korku Endeksi)</label><b>18.5 (Düşük)</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 9: BACKTESTING ═══ -->
+        <div id="tab-backtest" class="tab">
+            <div class="page-hdr">🔁 Backtesting & Doğrulama</div>
+            <div class="three-grid">
+                <div class="glass panel">
+                    <h3>Walk-Forward Analizi</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Eğitim Periyodu</label><b>200 gün</b></div>
+                        <div class="kv"><label>Test Periyodu</label><b>50 gün (25%)</b></div>
+                        <div class="kv"><label>Out-of-Sample</label><b id="bt-oos">Son 50 gün</b></div>
+                        <div class="kv"><label>Cross Validation (K)</label><b>5-Fold</b></div>
+                        <div class="kv"><label>Bootstrapping</label><b>1000 örnek</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Monte Carlo Backtest</h3>
+                    <div class="big-num gold" id="bt-mc">---</div>
+                    <small>30 Gün Senaryo Fiyatı</small>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>90G Projeksiyon</label><b id="bt-mc90">---</b></div>
+                        <div class="kv"><label>Simülasyon Sayısı</label><b>1,000</b></div>
+                        <div class="kv"><label>Süreç</label><b>GBM (Geometric Brownian)</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Strateji Performansı</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Sharpe Oranı</label><b id="bt-sharpe">---</b><small>İdeal:
+                                &gt;1.0</small></div>
+                        <div class="kv"><label>Sortino Oranı</label><b id="bt-sortino">---</b><small>İdeal:
+                                &gt;1.5</small></div>
+                        <div class="kv"><label>Kazanma Oranı</label><b id="bt-wr">---</b><small>İdeal: &gt;55%</small>
+                        </div>
+                        <div class="kv"><label>Profit Factor</label><b id="bt-pf">---</b><small>İdeal: &gt;1.5</small>
+                        </div>
+                        <div class="kv"><label>İşlem Beklentisi</label><b id="bt-exp">---</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 10: PİYASA MİKRO YAPISII ═══ -->
+        <div id="tab-mikro" class="tab">
+            <div class="page-hdr">🔬 Piyasa Mikro Yapısı</div>
+            <div class="three-grid">
+                <div class="glass panel">
+                    <h3>Likidite</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Spread (Tahmini)</label><b>$0.50 - $1.00</b></div>
+                        <div class="kv"><label>Piyasa Etkisi</label><b>Düşük (Likid)</b></div>
+                        <div class="kv"><label>Kayma (Slippage)</label><b>%0.05 - %0.10</b></div>
+                        <div class="kv"><label>ATR (Volatilite Proxy)</label><b id="mic-atr">---</b></div>
+                        <div class="kv"><label>OBV Trendi</label><b id="mic-obv">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Sipariş Akışı</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Momentum (5g)</label><b id="mic-mom5">---</b></div>
+                        <div class="kv"><label>Fiyat Hızlanması</label><b id="mic-accel">---</b></div>
+                        <div class="kv"><label>Hacim Yoğunluğu</label><b id="mic-vol">---</b></div>
+                        <div class="kv"><label>VPIN Modeli</label><b>Sipariş Akışı Toksisitesi</b></div>
+                        <div class="kv"><label>Kyle Modeli</label><b>Likidite Proxy</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Piyasa Etkinliği</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Hurst (Efisyens)</label><b id="mic-hurst">---</b><small>=0.5 Etkin
+                                Piyasa</small></div>
+                        <div class="kv"><label>Otokorelasyon (Lag1)</label><b id="mic-autocorr">---</b><small>~0
+                                Etkin</small></div>
+                        <div class="kv"><label>Volatilite Kümelemesi</label><b id="mic-vcluster">---</b></div>
+                        <div class="kv"><label>Glosten-Milgrom</label><b>Bilgi Asimetrisi</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 11: HAFIZA & VEKTÖR DB ═══ -->
+        <div id="tab-hafiza" class="tab">
+            <div class="page-hdr">💾 Hafıza Sistemi & Vektör Veritabanı</div>
+            <div class="three-grid">
+                <div class="glass panel">
+                    <h3>🧠 Bellek Katmanları</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Kısa Süreli Hafıza</label><b id="mem-st">0 deneyim</b></div>
+                        <div class="kv"><label>Uzun Süreli Hafıza</label><b id="mem-lt">0 desen</b></div>
+                        <div class="kv"><label>Epizodik Hafıza</label><b>Son 100 işlem</b></div>
+                        <div class="kv"><label>Semantik Hafıza</label><b id="mem-patterns">---</b></div>
+                        <div class="kv"><label>RL Hafızası</label><b id="mem-rl">Deneyim Replay</b></div>
+                        <div class="kv"><label>Deneyim Buffer</label><b id="mem-exp">1000 kapasiteli</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>🗃️ Vektör Veritabanı</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>FAISS</label><b>✅ Lokal (Simüle)</b></div>
+                        <div class="kv"><label>ChromaDB</label><b>✅ Gömülü</b></div>
+                        <div class="kv"><label>Pinecone</label><b>🔑 API Key Gerekli</b></div>
+                        <div class="kv"><label>Weaviate</label><b>🔑 Cloud</b></div>
+                        <div class="kv"><label>Milvus</label><b>🟡 Docker</b></div>
+                        <div class="kv"><label>Neo4j (Knowledge Graph)</label><b>🟡 Planlandı</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>📡 Bilgi Grafiği</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Strateji Hafızası</label><b>Momentum + Reversion</b></div>
+                        <div class="kv"><label>Piyasa Desen Hafızası</label><b>250 gün analizi</b></div>
+                        <div class="kv"><label>Embedding Storage</label><b>Fiyat Vektörleri</b></div>
+                        <div class="kv"><label>LLM Entegrasyonu</label><b>🟡 GPT-4 (Planlandı)</b></div>
+                    </div>
+                    <div class="memory-box" id="haf-patterns">Hafıza örüntüsü analiz ediliyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 12: PERFORMANS ═══ -->
+        <div id="tab-perf" class="tab">
+            <div class="page-hdr">🏆 Performans Metrikleri</div>
+            <div class="four-grid">
+                <div class="glass panel perf-card">
+                    <h3>Sharpe Oranı</h3>
+                    <div class="big-num" id="pf-sharpe">---</div>
+                    <div class="ideal-info"><span class="red">&lt;0</span><span class="warn">0-1</span><span
+                            class="green">&gt;1</span><span class="gold">&gt;2 Mükemmel</span></div>
+                    <div class="ideal-bar">
+                        <div class="ib-fill green-fill" id="sharpe-bar"></div>
+                    </div>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>Sortino Oranı</h3>
+                    <div class="big-num" id="pf-sortino">---</div>
+                    <div class="ideal-info"><span class="red">&lt;0</span><span class="warn">0-1.5</span><span
+                            class="green">&gt;1.5</span></div>
+                    <div class="ideal-bar">
+                        <div class="ib-fill green-fill" id="sortino-bar"></div>
+                    </div>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>Calmar Oranı</h3>
+                    <div class="big-num" id="pf-calmar">---</div>
+                    <small>Sharpe÷MaxDD</small>
+                    <div class="ideal-info"><span class="red">&lt;0.5</span><span class="gold">&gt;1</span><span
+                            class="green">&gt;3 Mükemmel</span></div>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>Kazanma Oranı</h3>
+                    <div class="big-num" id="pf-winrate">---</div>
+                    <div class="ideal-info"><span class="red">&lt;45%</span><span class="warn">45-55%</span><span
+                            class="green">&gt;55%</span></div>
+                    <div class="ideal-bar">
+                        <div class="ib-fill blue-fill" id="wr-bar"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="four-grid mt2">
+                <div class="glass panel perf-card">
+                    <h3>Profit Factor</h3>
+                    <div class="big-num" id="pf-pf">---</div>
+                    <div class="ideal-info"><span class="red">&lt;1</span><span class="warn">1-1.5</span><span
+                            class="green">&gt;1.5</span></div>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>İşlem Beklentisi</h3>
+                    <div class="big-num" id="pf-exp">---</div>
+                    <small>%Ortalama Kazanç/Kayıp</small>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>Max Drawdown</h3>
+                    <div class="big-num red" id="pf-maxdd">---</div>
+                    <div class="ideal-info"><span class="green">&lt;10%</span><span class="warn">10-20%</span><span
+                            class="red">&gt;20%</span></div>
+                </div>
+                <div class="glass panel perf-card">
+                    <h3>Rolling Sharpe (21g)</h3>
+                    <div class="big-num" id="pf-rolling-sharpe">---</div>
+                    <small>Güncel 21 Günlük Sharpe</small>
+                </div>
+            </div>
+            <div class="glass panel mt2">
+                <h3>Sistem Günlüğü</h3>
+                <div class="log-terminal" id="log-terminal">
+                    <p>> Sistem başlatıldı.</p>
+                    <p>> Kantitatif motorlar yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 13: KARAR ROBOTU ═══ -->
+        <div id="tab-robot" class="tab">
+            <div class="page-hdr">🤖 Karar Verme Robotu</div>
+            <div class="three-grid">
+                <div class="glass panel risk-gls" style="border: 2px solid rgba(255, 204, 0, 0.3);">
+                    <h3>Nihai Yapay Zeka Kararı</h3>
+                    <div class="signal-big" id="rob-action" style="font-size: 3rem; margin: 15px 0;">BEKLE</div>
+                    <div class="kv-list mt1">
+                        <div class="kv"><label>Kazanma Olasılığı</label><b id="rob-prob">---</b></div>
+                        <div class="kv"><label>Trend Durumu (Boğa)</label><b id="rob-bull" class="green">---</b></div>
+                        <div class="kv"><label>Düzeltme Riski (Ayı)</label><b id="rob-bear" class="red">---</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Aksiyon Hedefleri</h3>
+                    <div class="kv-list">
+                        <div class="kv" style="padding: 15px 0;"><label>Hedef Fiyat (TP)</label><b id="rob-tp" class="gold" style="font-size:1.5rem">---</b></div>
+                        <div class="kv" style="padding: 15px 0;"><label>Zarar Kes (SL)</label><b id="rob-sl" class="red" style="font-size:1.5rem">---</b></div>
+                        <div class="kv" style="padding: 15px 0;"><label>Önerilen Risk</label><b>%1-2 Portföy</b></div>
+                        <div class="kv"><label>Vade</label><b>Kısa-Orta</b></div>
+                    </div>
+                </div>
+                <div class="glass panel">
+                    <h3>Karar Bileşenleri</h3>
+                    <div class="kv-list">
+                        <div class="kv"><label>Makro Zemin</label><b>Nötr / Destekleyici</b></div>
+                        <div class="kv"><label>Teknik Görünüm</label><b id="rob-tech">---</b></div>
+                        <div class="kv"><label>İstatistiksel Eğilim</label><b id="rob-stat">---</b></div>
+                        <div class="kv"><label>Model Güveni</label><b>Orta-Yüksek</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ SAYFA 14: PİYASA HABERLERİ ═══ -->
+        <div id="tab-haber" class="tab">
+            <div class="page-hdr">📰 Piyasa Haberleri & Duyarlılık</div>
+            <div class="glass panel" style="width: 100%; max-width: 800px; margin: 0 auto;">
+                <h3>Küresel Gelişmeler</h3>
+                <div id="news-container" style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                    <p>Yükleniyor...</p>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /shell -->
+
+    <footer class="footer">&copy; 2026 Altın Quant Terminali v3.0 — YZ, Ekonometri & Kantitatif Finans</footer>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+
+</html>
