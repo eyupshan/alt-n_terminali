@@ -48,7 +48,7 @@ class GoldDataLoader:
             print(f"  [{symbol}] hata: {ex}")
             return None
 
-    def fetch_gold_data(self, period="1mo", interval="1h"):
+    def fetch_gold_data(self, period="1mo", interval="1m"):
         """
         Altın spot ve USD/TRY verisini yfinance'dan çeker.
         Gram Altın (TRY) = (XAU/USD / 31.1035) * USD/TRY
@@ -110,7 +110,11 @@ class GoldDataLoader:
         try:
             import requests
             session = requests.Session()
-            session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"})
+            session.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "Accept": "*/*",
+                "Connection": "keep-alive"
+            })
             vol_hist = yf.download("GC=F", period=period, interval=interval, session=session, progress=False)
             if isinstance(vol_hist.columns, pd.MultiIndex):
                 vol_hist.columns = vol_hist.columns.get_level_values(0)
@@ -184,8 +188,8 @@ class GoldDataLoader:
         dates = pd.date_range(end=pd.Timestamp.now().normalize(), periods=250, freq="B")
         np.random.seed(int(pd.Timestamp.now().timestamp()) % 10000)
 
-        base_gold_usd = 2900.0   # Mart 2026 tahmini ~$2900/oz
-        base_usdtry = 38.5       # Mart 2026 tahmini ~38.5 TRY/USD
+        base_gold_usd = 5200   # Mart 2026 tahmini ~$2900/oz
+        base_usdtry = 44.05       # Mart 2026 tahmini ~38.5 TRY/USD
 
         dt = 1 / 252
         gold_vol = 0.185 * np.sqrt(dt)
@@ -215,7 +219,7 @@ class GoldDataLoader:
 _orig_fetch = GoldDataLoader.fetch_gold_data
 
 
-def _safe_fetch(self, period="1mo", interval="1h"):
+def _safe_fetch(self, period="1mo", interval="1m"):
     try:
         return _orig_fetch(self, period=period, interval=interval)
     except Exception as e:
@@ -228,9 +232,10 @@ GoldDataLoader.fetch_gold_data = _safe_fetch
 
 if __name__ == "__main__":
     loader = GoldDataLoader()
-    df = loader.fetch_gold_data(period="1m")
+    df = loader.fetch_gold_data(period="1mo")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
 
