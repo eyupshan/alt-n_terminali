@@ -48,7 +48,7 @@ class GoldDataLoader:
             print(f"  [{symbol}] hata: {ex}")
             return None
 
-    def fetch_gold_data(self, period="1mo", interval="1m"):
+    def fetch_gold_data(self, period="7d", interval="1m"):
         """
         Altın spot ve USD/TRY verisini yfinance'dan çeker.
         Gram Altın (TRY) = (XAU/USD / 31.1035) * USD/TRY
@@ -219,7 +219,7 @@ class GoldDataLoader:
 _orig_fetch = GoldDataLoader.fetch_gold_data
 
 
-def _safe_fetch(self, period="1mo", interval="1m"):
+def _safe_fetch(self, period="7d", interval="1m"):
     try:
         return _orig_fetch(self, period=period, interval=interval)
     except Exception as e:
@@ -232,9 +232,10 @@ GoldDataLoader.fetch_gold_data = _safe_fetch
 
 if __name__ == "__main__":
     loader = GoldDataLoader()
-    df = loader.fetch_gold_data(period="1mo")
+    df = loader.fetch_gold_data(period="7d")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
 
