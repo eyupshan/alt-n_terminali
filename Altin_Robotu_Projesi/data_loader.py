@@ -19,9 +19,6 @@ class GoldDataLoader:
             print("Uyarı: 'fredapi' kütüphanesi bulunamadı, makro veriler kapalı.")
             self.fred = None
 
-    # ------------------------------------------------------------------
-    # Altın verisi çekme (yfinance) — çoklu fallback semboller
-    # ------------------------------------------------------------------
     def _fetch_single(self, symbol: str, period: str, interval: str) -> pd.Series:
         """Tek bir sembol için Close serisi döndürür; boşsa None."""
         try:
@@ -47,14 +44,13 @@ class GoldDataLoader:
             print(f"  [{symbol}] hata: {ex}")
             return None
 
-    def fetch_gold_data(self, period="5d", interval="1m"):
+    def fetch_gold_data(self, period="1y", interval="1d"):
         """
         Altın spot ve USD/TRY verisini yfinance'dan çeker.
         Gram Altın (TRY) = (XAU/USD / 31.1035) * USD/TRY
         """
         print("Piyasa verisi çekiliyor (yfinance çoklu sembol)...")
 
-        # ── Altın (USD/oz) ──
         gold_series = None
         gold_is_etf = False
         for sym in ["GC=F", "XAUUSD=X", "GLD"]:
@@ -65,7 +61,6 @@ class GoldDataLoader:
                 print(f"  [OK] Altın verisi: {sym} ({len(s)} veri)")
                 break
 
-        # ── USD/TRY ──
         try_series = None
         for sym in ["USDTRY=X", "TRY=X"]:
             s = self._fetch_single(sym, period, interval)
@@ -74,19 +69,16 @@ class GoldDataLoader:
                 print(f"  [OK] USD/TRY verisi: {sym} ({len(s)} veri)")
                 break
 
-        # ── Başarı kontrolü ──
         if gold_series is None or try_series is None:
             raise ValueError(
                 f"Veri çekilemedi: gold={'OK' if gold_series is not None else 'YOK'}, "
                 f"try={'OK' if try_series is not None else 'YOK'}"
             )
 
-        # ── Birleştir: ortak tarihler üzerinde inner join ──
         df = pd.DataFrame({"Gold_USD": gold_series, "USD_TRY": try_series})
         df = df.dropna(how="any")
 
         if len(df) < 1:
-            # Eksik günleri ffill ile doldur
             idx_union = gold_series.index.union(try_series.index)
             gold_r = gold_series.reindex(idx_union).ffill()
             try_r = try_series.reindex(idx_union).ffill()
@@ -95,14 +87,11 @@ class GoldDataLoader:
         if len(df) < 1:
             raise ValueError(f"Birleştirilmiş veri yetersiz: {len(df)} satır")
 
-        # GLD ETF → yaklaşık 1/10 oz: düzeltme faktörü
         if gold_is_etf:
             df["Gold_USD"] = df["Gold_USD"] * 1
 
-        # Gram Altın (TRY): (USD/oz / 31.1035) * USD/TRY
         df["Gram_Gold"] = (df["Gold_USD"] / 31.1035) * df["USD_TRY"]
 
-        # Volume (GC=F'den al, yoksa synthetic)
         try:
             import requests
             session = requests.Session()
@@ -130,11 +119,7 @@ class GoldDataLoader:
         )
         return df
 
-    # ------------------------------------------------------------------
-    # Haber simülasyonu
-    # ------------------------------------------------------------------
     def fetch_news(self, query="gold price"):
-        """Duygu analizi için simüle haber başlıkları döndürür."""
         headlines = [
             "🚨 Altın fiyatları, yatırımcıların ABD enflasyon verilerine odaklanmasıyla yatay seyrediyor.",
             "🌍 Merkez bankaları, artan jeopolitik riskler nedeniyle altın rezervlerini hızla güçlendiriyor.",
@@ -144,11 +129,7 @@ class GoldDataLoader:
         ]
         return headlines
 
-    # ------------------------------------------------------------------
-    # Makro göstergeler (FRED)
-    # ------------------------------------------------------------------
     def fetch_macro_indicators(self):
-        """FRED'den makro veri çeker (CPI, Faiz, M2...)."""
         if not self.fred:
             return pd.DataFrame(
                 {
@@ -157,35 +138,20 @@ class GoldDataLoader:
                     "M2_Money_Supply": [21000, 21100, 21200],
                 }
             )
-
-        indicators = {
-            "CPI": "CPIAUCSLD",
-            "Interest_Rate": "FEDFUNDS",
-            "M2_Money_Supply": "M2SL",
-            "GDP": "GDP",
-            "Unemployment": "UNRATE",
-        }
-
+        indicators = {"CPI": "CPIAUCSLD", "Interest_Rate": "FEDFUNDS", "M2_Money_Supply": "M2SL", "GDP": "GDP", "Unemployment": "UNRATE"}
         macro_df = pd.DataFrame()
         for name, series_id in indicators.items():
-            try:
-                macro_df[name] = self.fred.get_series(series_id)
-            except Exception:
-                continue
-
+            try: macro_df[name] = self.fred.get_series(series_id)
+            except Exception: continue
         return macro_df
 
-    # ------------------------------------------------------------------
-    # Gerçekçi sentetik veri (yfinance tamamen başarısız olursa)
-    # ------------------------------------------------------------------
     def _synthetic_fallback(self):
-        """Mart 2026 piyasa koşullarına göre sentetik veri üretir."""
         print("  [!] Sentetik (simüle) veri kullanılıyor...")
         dates = pd.date_range(end=pd.Timestamp.now().normalize(), periods=250, freq="B")
         np.random.seed(int(pd.Timestamp.now().timestamp()) % 10000)
 
-        base_gold_usd = 2900.0   # Mart 2026 tahmini ~$2900/oz
-        base_usdtry = 38.5       # Mart 2026 tahmini ~38.5 TRY/USD
+        base_gold_usd = 2900.0   
+        base_usdtry = 38.5       
 
         dt = 1 / 252
         gold_vol = 0.185 * np.sqrt(dt)
@@ -202,19 +168,11 @@ class GoldDataLoader:
         df["USD_TRY"] = usdtry
         df["Gram_Gold"] = (df["Gold_USD"] / 31.1035) * df["USD_TRY"]
         df["Volume"] = np.random.randint(5000, 20000, size=250)
-
-        print(
-            f"  Sentetik: {len(df)} gün | "
-            f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | "
-            f"Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}"
-        )
         return df
 
-
-# Override: ana veri çekme fonksiyonu her hata durumunda sentetiğe düşsün
 _orig_fetch = GoldDataLoader.fetch_gold_data
 
-def _safe_fetch(self, period="5d", interval="1m"):
+def _safe_fetch(self, period="1y", interval="1d"):
     try:
         return _orig_fetch(self, period=period, interval=interval)
     except Exception as e:
@@ -225,9 +183,10 @@ GoldDataLoader.fetch_gold_data = _safe_fetch
 
 if __name__ == "__main__":
     loader = GoldDataLoader()
-    df = loader.fetch_gold_data(period="5d", interval="1m")
+    df = loader.fetch_gold_data(period="1y", interval="1d")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
 
