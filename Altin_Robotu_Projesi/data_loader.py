@@ -45,7 +45,7 @@ class GoldDataLoader:
             print(f"  [{symbol}] hata: {ex}")
             return None
 
-    def fetch_gold_data(self, period="1y", interval="1d"):
+    def fetch_gold_data(self, period="1mo", interval="1h"):
         """
         Altın spot ve USD/TRY verisini yfinance'dan çeker.
         Gram Altın (TRY) = (XAU/USD / 31.1035) * USD/TRY
@@ -60,7 +60,7 @@ class GoldDataLoader:
         gold_is_etf = False
         for sym in ["GC=F", "XAUUSD=X", "GLD"]:
             s = self._fetch_single(sym, period, interval)
-            if s is not None and len(s) >= 10:
+            if s is not None and len(s) >= 1:
                 gold_series = s
                 gold_is_etf = (sym == "GLD")
                 print(f"  [OK] Altın verisi: {sym} ({len(s)} gün)")
@@ -70,7 +70,7 @@ class GoldDataLoader:
         try_series = None
         for sym in ["USDTRY=X", "TRY=X"]:
             s = self._fetch_single(sym, period, interval)
-            if s is not None and len(s) >= 10:
+            if s is not None and len(s) >= 1:
                 try_series = s
                 print(f"  [OK] USD/TRY verisi: {sym} ({len(s)} gün)")
                 break
@@ -98,7 +98,7 @@ class GoldDataLoader:
 
         # GLD ETF → yaklaşık 1/10 oz: düzeltme faktörü
         if gold_is_etf:
-            df["Gold_USD"] = df["Gold_USD"] * 10
+            df["Gold_USD"] = df["Gold_USD"] * 1
 
         # Gram Altın (TRY): (USD/oz / 31.1035) * USD/TRY
         df["Gram_Gold"] = (df["Gold_USD"] / 31.1035) * df["USD_TRY"]
@@ -212,7 +212,7 @@ class GoldDataLoader:
 _orig_fetch = GoldDataLoader.fetch_gold_data
 
 
-def _safe_fetch(self, period="1y", interval="1d"):
+def _safe_fetch(self, period="1mo", interval="1h"):
     try:
         return _orig_fetch(self, period=period, interval=interval)
     except Exception as e:
@@ -228,4 +228,5 @@ if __name__ == "__main__":
     df = loader.fetch_gold_data(period="6mo")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
