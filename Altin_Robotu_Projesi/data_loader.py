@@ -3,14 +3,12 @@ import pandas as pd
 import numpy as np
 import os
 
-
 def _strip_tz(idx):
     """Zaman dilimi bilgisini güvenli şekilde kaldır."""
     idx = pd.to_datetime(idx)
     if idx.tz is not None:
         return idx.tz_localize(None)
     return idx
-
 
 class GoldDataLoader:
     def __init__(self, fred_api_key=None):
@@ -29,11 +27,12 @@ class GoldDataLoader:
         try:
             import requests
             session = requests.Session()
-          session.headers.update({
+            session.headers.update({
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
                 "Accept": "*/*",
                 "Connection": "keep-alive"
             })
+            
             hist = yf.download(symbol, period=period, interval=interval, session=session, progress=False, timeout=15)
             if isinstance(hist.columns, pd.MultiIndex):
                 hist.columns = hist.columns.get_level_values(0)
@@ -48,13 +47,10 @@ class GoldDataLoader:
             print(f"  [{symbol}] hata: {ex}")
             return None
 
-    def fetch_gold_data(self, period="7d", interval="1m"):
+    def fetch_gold_data(self, period="5d", interval="1m"):
         """
         Altın spot ve USD/TRY verisini yfinance'dan çeker.
         Gram Altın (TRY) = (XAU/USD / 31.1035) * USD/TRY
-
-        Altın sembolleri öncelik sırasıyla: GC=F → XAUUSD=X → GLD
-        Döviz sembolleri öncelik sırasıyla: USDTRY=X → TRY=X
         """
         print("Piyasa verisi çekiliyor (yfinance çoklu sembol)...")
 
@@ -66,7 +62,7 @@ class GoldDataLoader:
             if s is not None and len(s) >= 1:
                 gold_series = s
                 gold_is_etf = (sym == "GLD")
-                print(f"  [OK] Altın verisi: {sym} ({len(s)} gün)")
+                print(f"  [OK] Altın verisi: {sym} ({len(s)} veri)")
                 break
 
         # ── USD/TRY ──
@@ -75,7 +71,7 @@ class GoldDataLoader:
             s = self._fetch_single(sym, period, interval)
             if s is not None and len(s) >= 1:
                 try_series = s
-                print(f"  [OK] USD/TRY verisi: {sym} ({len(s)} gün)")
+                print(f"  [OK] USD/TRY verisi: {sym} ({len(s)} veri)")
                 break
 
         # ── Başarı kontrolü ──
@@ -128,7 +124,7 @@ class GoldDataLoader:
             df["Volume"] = 10000
 
         print(
-            f"[OK] Veri hazır: {len(df)} gün | "
+            f"[OK] Veri hazır: {len(df)} periyot | "
             f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | "
             f"Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}"
         )
@@ -188,8 +184,8 @@ class GoldDataLoader:
         dates = pd.date_range(end=pd.Timestamp.now().normalize(), periods=250, freq="B")
         np.random.seed(int(pd.Timestamp.now().timestamp()) % 10000)
 
-        base_gold_usd = 5200   # Mart 2026 tahmini ~$2900/oz
-        base_usdtry = 44.05       # Mart 2026 tahmini ~38.5 TRY/USD
+        base_gold_usd = 2900.0   # Mart 2026 tahmini ~$2900/oz
+        base_usdtry = 38.5       # Mart 2026 tahmini ~38.5 TRY/USD
 
         dt = 1 / 252
         gold_vol = 0.185 * np.sqrt(dt)
@@ -218,23 +214,21 @@ class GoldDataLoader:
 # Override: ana veri çekme fonksiyonu her hata durumunda sentetiğe düşsün
 _orig_fetch = GoldDataLoader.fetch_gold_data
 
-
-def _safe_fetch(self, period="7d", interval="1m"):
+def _safe_fetch(self, period="5d", interval="1m"):
     try:
         return _orig_fetch(self, period=period, interval=interval)
     except Exception as e:
         print(f"Uyarı: yfinance tamamen başarısız ({e}). Sentetik veriye geçiliyor...")
         return self._synthetic_fallback()
 
-
 GoldDataLoader.fetch_gold_data = _safe_fetch
-
 
 if __name__ == "__main__":
     loader = GoldDataLoader()
-    df = loader.fetch_gold_data(period="7d")
+    df = loader.fetch_gold_data(period="5d", interval="1m")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
 
