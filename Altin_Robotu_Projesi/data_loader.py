@@ -225,8 +225,9 @@ GoldDataLoader.fetch_gold_data = _safe_fetch
 
 if __name__ == "__main__":
     loader = GoldDataLoader()
-    df = loader.fetch_gold_data(period="6mo")
+    df = loader.fetch_gold_data(period="1m")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
