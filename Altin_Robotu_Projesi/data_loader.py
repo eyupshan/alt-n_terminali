@@ -29,8 +29,11 @@ class GoldDataLoader:
         try:
             import requests
             session = requests.Session()
-            session.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"})
-            
+          session.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+                "Accept": "*/*",
+                "Connection": "keep-alive"
+            })
             hist = yf.download(symbol, period=period, interval=interval, session=session, progress=False, timeout=15)
             if isinstance(hist.columns, pd.MultiIndex):
                 hist.columns = hist.columns.get_level_values(0)
@@ -228,6 +231,7 @@ if __name__ == "__main__":
     df = loader.fetch_gold_data(period="1m")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
 
 
 
