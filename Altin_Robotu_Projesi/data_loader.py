@@ -86,14 +86,14 @@ class GoldDataLoader:
         df = pd.DataFrame({"Gold_USD": gold_series, "USD_TRY": try_series})
         df = df.dropna(how="any")
 
-        if len(df) < 10:
+        if len(df) < 1:
             # Eksik günleri ffill ile doldur
             idx_union = gold_series.index.union(try_series.index)
             gold_r = gold_series.reindex(idx_union).ffill()
             try_r = try_series.reindex(idx_union).ffill()
             df = pd.DataFrame({"Gold_USD": gold_r, "USD_TRY": try_r}).dropna()
 
-        if len(df) < 10:
+        if len(df) < 1:
             raise ValueError(f"Birleştirilmiş veri yetersiz: {len(df)} satır")
 
         # GLD ETF → yaklaşık 1/10 oz: düzeltme faktörü
@@ -228,3 +228,4 @@ if __name__ == "__main__":
     df = loader.fetch_gold_data(period="6mo")
     print(df.tail())
     print(f"Son Ons: ${df['Gold_USD'].iloc[-1]:.2f} | Son Gram: TL{df['Gram_Gold'].iloc[-1]:.2f}")
+
